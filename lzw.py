@@ -1,27 +1,65 @@
 import getopt, sys, re
 import os
-
+import io
 counter = 256
-charTable = {}
+compresCharTable = dict((chr(j), j) for j in range(counter)) 
+decomCharTable =  dict((j, chr(j)) for j in range(counter))
 
 def compression(inputFile):
-    global counter,charTable
-    charTable = dict((bytes(j), j) for j in range(counter))
+    global counter,compresCharTable
     result = []
     p = ""
-    for c in inputFile:
+    i = 0
+    while i < len(inputFile):
+        c = chr(inputFile[i])
         pc = p + c
-        if pc in charTable:
+        if pc in compresCharTable:
             p = pc
         else:
-            result.append(charTable[p])
-            charTable[pc] = counter
+            result.append(compresCharTable[p])
+            compresCharTable[pc] = counter
             counter += 1
             p = c
+        i += 1
+    
+    if p:
+        result.append(compresCharTable[p])
     return result
 
-def decompress(object):
-    print("dosoemthing")
+def writeResult(name,result):
+    outputFile = open("file.lzw","w")
+    outputFile.write(name + " ")
+    for i  in result:
+        outputFile.write(str(i) + " ")
+    
+def convertToInt(inputFile):
+    aux = []
+    for i in inputFile:
+        aux.append(int(i))
+    return  aux
+
+def decompress(inputFile):
+    global counter,decomCharTable
+    inputFile = inputFile.split()
+    fileName = inputFile.pop(0)
+    inputFile = convertToInt(inputFile)
+    p = chr(inputFile.pop(0))
+    outputFile = open(fileName,"wb")
+    outputFile.write(p)
+
+    for c in inputFile:
+        if c  in decomCharTable:
+            entry = decomCharTable[c]
+            
+        elif c == counter:
+            entry = p + p[0]
+        outputFile.write(entry)
+        decomCharTable[counter] = p + entry[0]
+        counter += 1
+        p = entry
+    outputFile.close()
+    
+    
 
 def iterate_and_compress(arguments):
     for arg in arguments:
@@ -53,7 +91,7 @@ def main():
     
     except IndexError:
         print('no arguments found')    
-            
+    
 if __name__ == "__main__":
     main()
             
