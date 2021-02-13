@@ -6,7 +6,7 @@ charTable = {}
 
 def compression(inputFile):
     global counter,charTable
-    charTable = dict((chr(j), j) for j in range(counter))
+    charTable = dict((bytes(j), j) for j in range(counter))
     result = []
     p = ""
     for c in inputFile:
@@ -26,13 +26,14 @@ def decompress(object):
 def iterate_and_compress(arguments):
     for arg in arguments:
                 if os.path.isfile(arg): #if argument is a file opens and compressess it
-                    with open(arg) as f:
+                    with open(arg,'r') as f:
                         print(compression(f.read()))
                         
                 else: #if it's a directory scans and iterates it's paths
                     for entry in os.scandir(arg):
                         if (entry.path.endswith(".txt") or entry.path.endswith(".png")) and entry.is_file():
-                            print(entry.path)
+                            with open(entry.path,'r') as f:
+                                print(compression(f.read()))
 
 def main():
         
