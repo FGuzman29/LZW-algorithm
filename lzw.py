@@ -1,66 +1,106 @@
 import getopt, sys, re
-import os
-import io
+import os, io
+import base64
 counter = 256
-compresCharTable = dict((chr(j), j) for j in range(counter)) 
-decomCharTable =  dict((j, chr(j)) for j in range(counter))
-
+compresTable = dict((chr(j), j) for j in range(counter)) 
+decompressTable = dict((j,chr(j)) for j in range(counter))
 def compression(inputFile):
-    global counter,compresCharTable
+    global counter,compresTable
     result = []
     p = ""
-    i = 0
-    while i < len(inputFile):
-        c = chr(inputFile[i])
-        pc = p + c
-        if pc in compresCharTable:
-            p = pc
-        else:
-            result.append(compresCharTable[p])
-            compresCharTable[pc] = counter
-            counter += 1
-            p = c
-        i += 1
-    
-    if p:
-        result.append(compresCharTable[p])
-    return result
-
-def writeResult(name,result):
-    outputFile = open("file.lzw","w")
-    outputFile.write(name + " ")
-    for i  in result:
-        outputFile.write(str(i) + " ")
-    
-def convertToInt(inputFile):
-    aux = []
-    for i in inputFile:
-        aux.append(int(i))
-    return  aux
-
-def decompress(inputFile):
-    global counter,decomCharTable
-    inputFile = inputFile.split()
-    fileName = inputFile.pop(0)
-    inputFile = convertToInt(inputFile)
-    p = chr(inputFile.pop(0))
-    outputFile = open(fileName,"wb")
-    outputFile.write(p)
 
     for c in inputFile:
-        if c  in decomCharTable:
-            entry = decomCharTable[c]
-            
-        elif c == counter:
-            entry = p + p[0]
-        outputFile.write(entry)
-        decomCharTable[counter] = p + entry[0]
-        counter += 1
-        p = entry
-    outputFile.close()
-    
-    
+        if type(c) == int:
+            c = chr(c)
+        
+        pc = p + c
+        if pc in compresTable:
+            p = pc
 
+        else:
+            result.append(compresTable[p])
+            compresTable[pc] = counter
+            counter +=1
+            p = c
+
+    if p:
+        result.append(compresTable[p])
+
+    return result
+
+def writeResult(name, result):
+    outputFile = open("file.lzw","w")
+    outputFile.write(name + " ")
+
+    for i in result:
+        outputFile.write(str(i) + " ")
+
+    outputFile.close()
+
+def decompression(inputFile):
+    global counter, decompressTable
+    inputFile = inputFile.split() #split the string into a list
+    fileName = inputFile.pop(0) #save the file name and delete it from the list
+    inputFile = convertToInt(inputFile)
+    result = ""
+    p = chr(inputFile[0])
+    result += p
+    i = 1
+
+    while i < len(inputFile):
+        c = inputFile[i]
+
+        if c not in decompressTable:
+            s = p + p[0]
+
+        else:
+            s = decompressTable[c]
+
+        result += s
+        decompressTable[counter] = p + s[0]
+        counter += 1
+        p = s
+        i += 1
+    
+    if ".PNG" in fileName or ".JPG" in fileName: #if file is an image, write it in bytes
+        outputFile = open(fileName ,"wb")
+        result = base64.b64decode(result)
+
+    else: 
+        outputFile = open(fileName, "w")
+        
+    outputFile.write(result) 
+    outputFile.close()
+
+def convertToInt(arr):
+    aux = []
+
+    for i in arr:
+        aux.append(int(i))
+
+    return aux
+
+def mainTest():
+    selection = input("c for compression, d for decompresion: ")
+    if selection == 'c':
+        path = input("Add path: ")
+        inputFile = io.open(path,"rb")
+        fileName = os.path.basename(path)
+
+        if ".PNG" in fileName or ".JPG" in fileName:
+            img = base64.b64encode(inputFile.read())
+            result = compression(img)
+
+        else:
+            result = compression(inputFile.read())
+
+        writeResult(fileName,result)
+
+    if selection == 'd':
+        path = input("Add path: ")
+        inputFile = io.open(path,"r")
+        result = decompression(inputFile.read())
+    
 def iterate_and_compress(arguments):
     for arg in arguments:
                 if os.path.isfile(arg): #if argument is a file opens and compressess it
@@ -91,7 +131,7 @@ def main():
     
     except IndexError:
         print('no arguments found')    
-    
+
 if __name__ == "__main__":
     main()
             
