@@ -101,10 +101,13 @@ def iterate_and_compress(arguments):
                 else: #if it's a directory scans and iterates it's paths
                     for entry in os.scandir(arg):
                         if (entry.path.endswith(".txt") or entry.path.endswith(".png")) and entry.is_file():
-                            with open(entry.path,'r') as f:
-                                print(compression(f.read()))
+                            with open(entry.path,'r') as f: 
                                 
-def decompress_and_iterate(file_path): #just one file for now
+                                #poner un if para diferenciar que cuando es .png se decodifica con base64(o como se vaya ahacer o el decoder default de texto utf8)
+                                writeResult2(compression(f.read().decode()))
+                                
+def decompress_and_iterate(file_path): #just one file for now...
+    
 
     with open(file_path, 'rb') as infile:
         content = pickle.load(infile)
@@ -120,8 +123,6 @@ def main():
                     
         elif arguments[0] == '-d':
             decompress_and_iterate(arguments[1])
-            # with open(arguments[1]) as f:
-            #     decompress(f.read())
                 
         elif arguments[0] == ("-h"): 
                 print('COMMANDS: \n compress mode: -c followed by as many files and directories as you want \n decompress mode: -d followed by a single .lzw file')
