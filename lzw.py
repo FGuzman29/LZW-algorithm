@@ -61,25 +61,24 @@ def decompress(compressed): #from rosetta code
 
 def iterate_and_compress(arguments):
     for arg in arguments:
-                if os.path.isfile(arg): #if argument is a file opens and compressess it
-                    with open(arg,'rb') as f:
-                        write_result(arg, compression(f.read().decode())) 
-                        #agregar condicional si es imagen
+        if os.path.isfile(arg): #if argument is a file opens and compressess it
+            with open(arg,'r') as f:
+                write_result(arg, compression(f.read())) 
+                #agregar condicional si es imagen
+                
+                
+        else: #if it's a directory scans and iterates it's paths
+            for entry in os.scandir(arg):
+                if entry.path.endswith(".txt"):
+                    with open(entry.path,'rb') as f: 
+                        write_result(entry.path, compression(f.read().decode()))
                         
                         
-                else: #if it's a directory scans and iterates it's paths
-                    for entry in os.scandir(arg):
-                        if entry.path.endswith(".txt"):
-                            with open(entry.path,'rb') as f: 
-                                write_result(entry.path, compression(f.read().decode()))
-                                
-                                
-                        if entry.path.endswith(".png","jpg"):
-                            with open(entry.path,'rb') as f:
-                                img = base64.b64encode(f.read())
-                                write_result(entry.path, compression(img))
-                                
-                                
+                if entry.path.endswith(".png") or entry.path.endswith(".jpg"):
+                    with open(entry.path,'rb') as f:
+                        img = base64.b64encode(f.read())
+                        
+                        write_result(entry.path, compression(img.decode('utf-8')))                      
     save_comp_file()
                                 
 def decompress_and_iterate(file_path):
@@ -89,19 +88,17 @@ def decompress_and_iterate(file_path):
         
         for file in compressed_files:
             file_name = file.pop(0)
-            # new_file = open(file_name,'wb')
+            result = decompress(file)
             
             if file_name.endswith('.txt'):
                 new_file = open(file_name,'w')
-                print(decompress(file))
-                new_file.write(decompress(file))
+                
                 
             elif file_name.endswith('.png') or file_name.endswith('.jpg'):
                 new_file = open(file_name,'wb')
-                print("do something")
-                new_file.close()
-                #decode to string
-        
+                result = base64.b64decode(result)
+
+            new_file.write(result)
             new_file.close()
 
 def main():
