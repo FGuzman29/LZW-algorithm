@@ -2,6 +2,7 @@ import sys, re, os, io, base64, pickle
 from io import StringIO
 
 dictionary_size = 256
+compression_results = [] #lista de listas, donde indice [0][0] es el nombre del primer archivo comprimido y el resto es la lista de enteros resulatado de la compresion 
 
 def compression(inputFile):
     counter = 256
@@ -21,52 +22,23 @@ def compression(inputFile):
     if p:
         result.append(compresCharTable[p])
     return result
-
-def writeResult(name,result):
-    outputFile = open("file.lzw","w")
-    outputFile.write(name + " ")
-    for i  in result:
-        outputFile.write(str(i) + " ")
         
-def writeResult2 (result):
+def write_result(name,result):
+    global compression_results
+    result.insert(0,name)
+    compression_results += (result,)
+
+
+def save_comp_file():
+    global compression_results
     outfile = open('result.lzw','wb')
-    pickle.dump(result,outfile)
-    
-def convertToInt(inputFile):
-    aux = []
-    for i in inputFile:
-        aux.append(int(i))
-    return  aux
+    pickle.dump(compression_results,outfile)    
 
-def decompress(inputFile):
-    global counter,decomCharTable
-    decomCharTable =  dict((j, chr(j)) for j in range(counter))
-    
-    inputFile = inputFile.split()
-    fileName = inputFile.pop(0)
-    inputFile = convertToInt(inputFile)
-    p = chr(inputFile.pop(0))
-    outputFile = open(fileName,"wb")
-    outputFile.write(p)
-
-    for c in inputFile:
-        if c  in decomCharTable:
-            entry = decomCharTable[c]
-            
-        elif c == counter:
-            entry = p + p[0]
-        outputFile.write(entry)
-        decomCharTable[counter] = p + entry[0]
-        counter += 1
-        p = entry
-    outputFile.close()
-
-
-def decompress3(compressed): #from rosetta code
+def decompress(compressed): #from rosetta code
     # Build the dictionary.
     dict_size = 256
     dictionary = {i: chr(i) for i in range(dict_size)}
- 
+    
     result = StringIO()
     w = chr(compressed.pop(0))
     result.write(w)
@@ -91,27 +63,38 @@ def iterate_and_compress(arguments):
     for arg in arguments:
                 if os.path.isfile(arg): #if argument is a file opens and compressess it
                     with open(arg,'rb') as f:
-                        # b64string = base64.b64encode(f.read())
-                        # print(b64string)
-                        # print(type(b64string))
-                        # print(f.read().decode())
-                        writeResult2(compression(f.read().decode()))
+                        write_result(arg, compression(f.read().decode())) 
+                        #agregar condicional si es imagen
                         
                         
                 else: #if it's a directory scans and iterates it's paths
                     for entry in os.scandir(arg):
                         if (entry.path.endswith(".txt") or entry.path.endswith(".png")) and entry.is_file():
-                            with open(entry.path,'r') as f: 
+                            with open(entry.path,'rb') as f: 
+                                #agregar condicionale si es imagen
+                                write_result(entry.path, compression(f.read().decode()))
+                                #en la funcion write_result, si el archivo no es del mismo directorio toma el nombre del path entreo (?)
+    save_comp_file()
                                 
-                                #poner un if para diferenciar que cuando es .png se decodifica con base64(o como se vaya ahacer o el decoder default de texto utf8)
-                                writeResult2(compression(f.read().decode()))
-                                
-def decompress_and_iterate(file_path): #just one file for now...
+def decompress_and_iterate(file_path):
     
-
-    with open(file_path, 'rb') as infile:
-        content = pickle.load(infile)
-        print(decompress3(content))
+    with open(file_path, 'rb') as lzw_file:
+        compressed_files = pickle.load(lzw_file)
+        
+        for file in compressed_files:
+            file_name = file.pop(0)
+            # new_file = open(file_name,'wb')
+            
+            if file_name.endswith('.txt'):
+                new_file = open(file_name,'w')
+                print(decompress(file))
+                new_file.write(decompress(file))
+                
+            elif file_name.endswith('.png'):
+                print("do something")
+                #decode to string
+        
+            new_file.close()
 
 def main():
         
@@ -132,4 +115,4 @@ def main():
     
 if __name__ == "__main__":
     main()
-            
+    
