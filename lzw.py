@@ -91,9 +91,7 @@ def decompress_and_iterate(file_path):
             result = decompress(file)
             
             if file_name.endswith('.txt'):
-                new_file = open(file_name,'w')
-                
-                
+                new_file = open(file_name,'w')             
             elif file_name.endswith('.png') or file_name.endswith('.jpg'):
                 new_file = open(file_name,'wb')
                 result = base64.b64decode(result)
