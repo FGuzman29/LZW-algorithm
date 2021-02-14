@@ -69,11 +69,17 @@ def iterate_and_compress(arguments):
                         
                 else: #if it's a directory scans and iterates it's paths
                     for entry in os.scandir(arg):
-                        if (entry.path.endswith(".txt") or entry.path.endswith(".png")) and entry.is_file():
+                        if entry.path.endswith(".txt"):
                             with open(entry.path,'rb') as f: 
-                                #agregar condicionale si es imagen
                                 write_result(entry.path, compression(f.read().decode()))
-                                #en la funcion write_result, si el archivo no es del mismo directorio toma el nombre del path entreo (?)
+                                
+                                
+                        if entry.path.endswith(".png","jpg"):
+                            with open(entry.path,'rb') as f:
+                                img = base64.b64encode(f.read())
+                                write_result(entry.path, compression(img))
+                                
+                                
     save_comp_file()
                                 
 def decompress_and_iterate(file_path):
@@ -90,8 +96,10 @@ def decompress_and_iterate(file_path):
                 print(decompress(file))
                 new_file.write(decompress(file))
                 
-            elif file_name.endswith('.png'):
+            elif file_name.endswith('.png') or file_name.endswith('.jpg'):
+                new_file = open(file_name,'wb')
                 print("do something")
+                new_file.close()
                 #decode to string
         
             new_file.close()
