@@ -62,12 +62,14 @@ def filter(file_path):
 
     if file_path.endswith(".PNG") or file_path.endswith(".JPG"): #si es imagen la codifica a base64 y luego decodifica a string(utf-8) para usar en alg de compresion
         with open(file_path,'rb') as f:
+            name = os.path.basename(file_path)
             img = base64.b64encode(f.read())
-            write_result(file_path, compression(img.decode('utf-8')))
+            write_result(name, compression(img.decode('utf-8')))
             
     else: #cualquier otro archive asume que contiene texto (.txt, .c)
         with open(file_path,'r') as f: 
-            write_result(file_path, compression(f.read()))
+            name = os.path.basename(file_path)
+            write_result(name, compression(f.read()))
                                
     save_comp_file()
     
@@ -78,8 +80,7 @@ def argument_iterator(arguments):
             
         else:
             for entry in os.scandir(arg):
-                print(sys.platform)
-                filter(arg+"//"+entry.name)
+                filter(os.path.join(arg,entry.name))
                                 
 def decompress_and_iterate(file_path):
     global compressed_files
@@ -121,5 +122,4 @@ def main():
     
 if __name__ == "__main__":
     main()
-    
     
