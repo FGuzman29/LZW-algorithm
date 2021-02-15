@@ -1,15 +1,24 @@
 # LZW-algorithm
 
-los archivos a comprimir deben estar en el mismo directorio que el script
+*los archivos a comprimir deben estar en el mismo directorio que el script*
 
 correr de la siguiente manera(ejemplo):
 python lzw.py -c mifolder test3.txt
 python lzw.py -d result.lzw		(puede borrar los archivos antes de descomprimir para comprobar que funciona)
 
 
+
+
+
+
+
+
+
+
+
 ////////////////////////////////////////////////////////////
 
-Para correr el programa como un comando -lzw- en shell, en cualquier directorio, inicialmente se queria hacer un archivo .cmd o .bat que se corra una vez y quede todo listo
+Para correr el programa como un comando -lzw- en shell(windows), en cualquier directorio, inicialmente se queria hacer un archivo .cmd o .bat que se corra una vez y quede todo listo
 pero en el camino nos encontramos con alguna adversidades. 
 
 paso 1) agregar directorio actual a path user variable
