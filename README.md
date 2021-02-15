@@ -1,13 +1,8 @@
 # LZW-algorithm
 
 *los archivos a comprimir deben estar en el mismo directorio que el script*
-
-correr de la siguiente manera(ejemplo):
-python lzw.py -c mifolder test3.txt
-python lzw.py -d result.lzw		(puede borrar los archivos antes de descomprimir para comprobar que funciona)
-
-
-
+programa probado con python 3.8+
+corra lzw.py -h para informacion, -c compresion y -d descompresion
 
 
 
