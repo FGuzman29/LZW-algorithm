@@ -59,8 +59,8 @@ def decompress(compressed): #in: list of ints   out:string
     
 
 def filter(file_path):
-
-    if file_path.endswith(".PNG") or file_path.endswith(".JPG"): #si es imagen la codifica a base64 y luego decodifica a string(utf-8) para usar en alg de compresion
+    if ('.png' in file_path.lower()) or ('.jpg' in file_path.lower()):
+    #if file_path.lower().endswith(".png") or file_path.lower().endswith(".jpg"): #si es imagen la codifica a base64 y luego decodifica a string(utf-8) para usar en alg de compresion
         with open(file_path,'rb') as f:
             name = os.path.basename(file_path)
             img = base64.b64encode(f.read())
@@ -94,8 +94,8 @@ def decompress_and_iterate(file_path):
             if dir_name != "":
                 os.makedirs(dir_name,exist_ok=True)
                 
-                         
-            if file_name.endswith('.PNG') or file_name.endswith('.JPG'):
+            if ('.png' in file_name.lower()) or ('.jpg' in file_name.lower()):             
+            #if file_name.endswith('.PNG') or file_name.endswith('.JPG'):
                 new_file = open(file_name,'wb')
                 result = base64.b64decode(result)
             else:
