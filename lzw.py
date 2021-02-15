@@ -1,10 +1,11 @@
+#! /usr/bin/python3
 import sys, re, os, io, base64, pickle
 from io import StringIO
 
 dictionary_size = 256
-compression_results = [] #lista de listas, donde indice [0][0] es el nombre del primer archivo comprimido y el resto es la lista de enteros resulatado de la compresion 
+compressed_files = [] #lista de listas, donde indice [0][0] es el nombre del primer archivo comprimido y el resto es la lista de enteros resulatado de la compresion 
 
-def compression(inputFile):
+def compression(inputFile):#in: string  out:list of ints
     counter = 256
     compresCharTable = dict((chr(j), j) for j in range(counter))
     result = []
@@ -24,18 +25,17 @@ def compression(inputFile):
     return result
         
 def write_result(name,result):
-    global compression_results
+    global compressed_files
     result.insert(0,name)
-    compression_results += (result,)
+    compressed_files += (result,)
 
 
 def save_comp_file():
-    global compression_results
+    global compressed_files
     outfile = open('result.lzw','wb')
-    pickle.dump(compression_results,outfile)    
+    pickle.dump(compressed_files,outfile)    
 
-def decompress(compressed): #from rosetta code
-    # Build the dictionary.
+def decompress(compressed): #in: list of ints   out:string
     dict_size = 256
     dictionary = {i: chr(i) for i in range(dict_size)}
     
@@ -50,8 +50,7 @@ def decompress(compressed): #from rosetta code
         else:
             raise ValueError('Bad compressed k: %s' % k)
         result.write(entry)
- 
-        # Add w+entry[0] to the dictionary.
+        
         dictionary[dict_size] = w + entry[0]
         dict_size += 1
  
@@ -59,37 +58,41 @@ def decompress(compressed): #from rosetta code
     return result.getvalue()
     
 
-def iterate_and_compress(arguments):
-    for arg in arguments:
-        if os.path.isfile(arg): #if argument is a file opens and compressess it
-            with open(arg,'r') as f:
-                write_result(arg, compression(f.read())) 
-                #agregar condicional si es imagen
-                
-                
-        else: #if it's a directory scans and iterates it's paths
-            for entry in os.scandir(arg):
-                if entry.path.endswith(".txt"):
-                    with open(entry.path,'rb') as f: 
-                        write_result(entry.path, compression(f.read().decode()))
-                        
-                        
-                if entry.path.endswith(".png") or entry.path.endswith(".jpg"):
-                    with open(entry.path,'rb') as f:
-                        img = base64.b64encode(f.read())
-                        
-                        write_result(entry.path, compression(img.decode('utf-8')))                      
+def filter(file_path):
+
+    if file_path.endswith(".png") or file_path.endswith(".jpg"): #si es imagen la codifica a base64 y luego decodifica a string(utf-8) para usar en alg de compresion
+        with open(file_path,'rb') as f:
+            img = base64.b64encode(f.read())
+            write_result(file_path, compression(img.decode('utf-8')))
+            
+    else: #cualquier otro archive asume que contiene texto (.txt, .c)
+        with open(file_path,'rb') as f: 
+            write_result(file_path, compression(f.read().decode()))
+                               
     save_comp_file()
+    
+def argument_iterator(arguments):
+    for arg in arguments: 
+        if os.path.isfile(arg): 
+            filter(arg)
+            
+        else:
+            for entry in os.scandir(arg):
+                print(arg+"\\"+entry.name)
+                filter(arg+"\\"+entry.name)
                                 
 def decompress_and_iterate(file_path):
-    
-    with open(file_path, 'rb') as lzw_file:
+    global compressed_files
+    with open(file_path, 'rb') as lzw_file: #open .lzw file
         compressed_files = pickle.load(lzw_file)
         
         for file in compressed_files:
             file_name = file.pop(0)
             result = decompress(file)
-            
+            dir_name = os.path.dirname(file_name)
+            if dir_name != "":
+                os.makedirs(dir_name,exist_ok=True)
+                
             if file_name.endswith('.txt'):
                 new_file = open(file_name,'w')             
             elif file_name.endswith('.png') or file_name.endswith('.jpg'):
@@ -105,7 +108,7 @@ def main():
 
     try:
         if arguments[0] == '-c':
-            iterate_and_compress(arguments[1:]) #pass remaining arguments
+            argument_iterator(arguments[1:]) #pass remaining arguments
                     
         elif arguments[0] == '-d':
             decompress_and_iterate(arguments[1])
