@@ -1,13 +1,10 @@
 import sys, re, os, io, base64, pickle
 
-counter = 256
-compresTable = dict((chr(j), j) for j in range(counter)) 
-decompressTable = dict((j,chr(j)) for j in range(counter))
-
 compression_results = [] #lista de listas, donde indice [0][0] es el nombre del primer archivo comprimido y el resto es la lista de enteros resulatado de la compresion 
 
 def compression(inputFile):
-    global counter,compresTable
+    counter = 256
+    compresTable = dict((chr(j), j) for j in range(counter))     
     result = []
     p = ""
 
@@ -36,9 +33,9 @@ def write_result(name,result):
     compression_results += (result,)
 
 
-def save_comp_file():
+def save_comp_file(path):
     global compression_results
-    outfile = open('result.lzw','w')
+    outfile = open(path+".lzw",'w')
     for i in compression_results:
         for j in i:
             outfile.write(str(j) + " ")
@@ -47,7 +44,8 @@ def save_comp_file():
     
 
 def decompress(compressed):
-    global counter, decompressTable
+    counter = 256
+    decompressTable = dict((j,chr(j)) for j in range(counter))
     compressed = compressed.split()
     fileName = compressed.pop(0)
     compressed = convertToInt(compressed)
@@ -83,6 +81,7 @@ def convertToInt(arr):
     return aux
     
 def iterate_and_compress(arguments):
+    final = arguments.pop()
     for arg in arguments:
         if os.path.isfile(arg): #if argument is a file opens and compressess it
             f = open(arg,"rb")
@@ -93,7 +92,7 @@ def iterate_and_compress(arguments):
             else:
                 write_result(name, compression(f.read()))
 
-    save_comp_file()
+    save_comp_file(final)
                                 
 def decompress_and_iterate(file_path):
     
@@ -115,7 +114,10 @@ def main():
             decompress_and_iterate(arguments[1])
                 
         elif arguments[0] == ("-h"): 
-                print('COMMANDS: \n compress mode: -c followed by as many files and directories as you want \n decompress mode: -d followed by a single .lzw file')
+                print('Flags: \n compress mode: -c  \n decompress mode: -d\n help: -h')
+                print("Usage: \n Windows: lzw.py [-mode/flag] [filesToCompress list] [compressedFile]")
+                print(" Linux:python3 lzw.py [-mode/flag] [filesToCompress list] [compressedFile]")
+                print("Warning: \n Last")
     
     except IndexError:
         print('no arguments found')    
