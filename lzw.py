@@ -60,14 +60,14 @@ def decompress(compressed): #in: list of ints   out:string
 
 def filter(file_path):
 
-    if file_path.endswith(".png") or file_path.endswith(".jpg"): #si es imagen la codifica a base64 y luego decodifica a string(utf-8) para usar en alg de compresion
+    if file_path.endswith(".PNG") or file_path.endswith(".JPG"): #si es imagen la codifica a base64 y luego decodifica a string(utf-8) para usar en alg de compresion
         with open(file_path,'rb') as f:
             img = base64.b64encode(f.read())
             write_result(file_path, compression(img.decode('utf-8')))
             
     else: #cualquier otro archive asume que contiene texto (.txt, .c)
-        with open(file_path,'rb') as f: 
-            write_result(file_path, compression(f.read().decode()))
+        with open(file_path,'r') as f: 
+            write_result(file_path, compression(f.read()))
                                
     save_comp_file()
     
@@ -78,8 +78,8 @@ def argument_iterator(arguments):
             
         else:
             for entry in os.scandir(arg):
-                print(arg+"\\"+entry.name)
-                filter(arg+"\\"+entry.name)
+                print(sys.platform)
+                filter(arg+"//"+entry.name)
                                 
 def decompress_and_iterate(file_path):
     global compressed_files
@@ -93,17 +93,17 @@ def decompress_and_iterate(file_path):
             if dir_name != "":
                 os.makedirs(dir_name,exist_ok=True)
                 
-            if file_name.endswith('.txt'):
-                new_file = open(file_name,'w')             
-            elif file_name.endswith('.png') or file_name.endswith('.jpg'):
+                         
+            if file_name.endswith('.PNG') or file_name.endswith('.JPG'):
                 new_file = open(file_name,'wb')
                 result = base64.b64decode(result)
-
+            else:
+                new_file = open(file_name,'w')
             new_file.write(result)
             new_file.close()
 
 def main():
-        
+    sys.getdefaultencoding()
     arguments = sys.argv[1:]  #saves arguments and removes the first one(which is *.py)
 
     try:
@@ -121,4 +121,5 @@ def main():
     
 if __name__ == "__main__":
     main()
+    
     
