@@ -115,7 +115,11 @@ def main():
             decompress_and_iterate(arguments[1])
                 
         elif arguments[0] == ("-h"): 
-                print('COMMANDS: \n compress mode: -c followed by as many files and directories as you want \n decompress mode: -d followed by a single .lzw file')
+            print('Flags: \n compress mode: -c  \n decompress mode: -d\n help: -h')
+            print("Usage: \nTo compress\n Windows: lzw.py [-c] [files/directories ToCompress list]")
+            print(" Linux:python3 lzw.py [-c] [files/directories ToCompress list] ")
+            print("To decompress\n Windows: lzw.py [-d] [filesToDecompress]")
+            print(" Linux:python3 lzw.py [-d] [filesToDecompress]")
     
     except IndexError:
         print('no arguments found')    
