@@ -1,25 +1,30 @@
 import sys, re, os, io, base64, pickle
-from io import StringIO
 
-dictionary_size = 256
+counter = 256
+compresTable = dict((chr(j), j) for j in range(counter)) 
+decompressTable = dict((j,chr(j)) for j in range(counter))
+
 compression_results = [] #lista de listas, donde indice [0][0] es el nombre del primer archivo comprimido y el resto es la lista de enteros resulatado de la compresion 
 
 def compression(inputFile):
-    counter = 256
-    compresCharTable = dict((chr(j), j) for j in range(counter))
+    global counter,compresTable
     result = []
-    p = ''
-    
-    for byte in inputFile:
-        pc = p + byte
-        if pc in compresCharTable:
+    p = ""
+
+    for c in inputFile:
+        if type(c) == int:
+            c = chr(c)
+        
+        pc = p + c
+        if pc in compresTable:
             p = pc
 
         else:
-            result.append(compresCharTable[p])
-            compresCharTable[pc] = counter
-            counter += 1
-            p = byte
+            result.append(compresTable[p])
+            compresTable[pc] = counter
+            counter +=1
+            p = c
+
     if p:
         result.append(compresTable[p])
 
@@ -33,111 +38,70 @@ def write_result(name,result):
 
 def save_comp_file():
     global compression_results
-    outfile = open('result.lzw','wb')
-    pickle.dump(compression_results,outfile)    
+    outfile = open('result.lzw','w')
+    for i in compression_results:
+        for j in i:
+            outfile.write(str(j) + " ")
+        outfile.write("\n")
+    outfile.close()
+    
 
-def decompress(compressed): #from rosetta code
-    # Build the dictionary.
-    dict_size = 256
-    dictionary = {i: chr(i) for i in range(dict_size)}
-    
-    result = StringIO()
-    w = chr(compressed.pop(0))
-    result.write(w)
-    for k in compressed:
-        if k in dictionary:
-            entry = dictionary[k]
-        elif k == dict_size:
-            entry = w + w[0]
+def decompress(compressed):
+    global counter, decompressTable
+    compressed = compressed.split()
+    fileName = compressed.pop(0)
+    compressed = convertToInt(compressed)
+    result = ""
+    p = chr(compressed[0])
+    result += p
+    i = 1
+    while i < len(compressed):
+        c = compressed[i]
+        if c not in decompressTable:
+            s = p + p[0]
         else:
-            raise ValueError('Bad compressed k: %s' % k)
-        result.write(entry)
- 
-        # Add w+entry[0] to the dictionary.
-        dictionary[dict_size] = w + entry[0]
-        dict_size += 1
- 
-        w = entry
-    return result.getvalue()
+            s = decompressTable[c]
+        result += s
+        decompressTable[counter] = p + s[0]
+        counter += 1
+        p = s
+        i += 1
     
-    if ".PNG" in fileName or ".JPG" in fileName: #if file is an image, write it in bytes
+    if ".png" in fileName.lower() or ".jpg" in fileName.lower():
         outputFile = open(fileName ,"wb")
         result = base64.b64decode(result)
-
     else: 
         outputFile = open(fileName, "w")
         
     outputFile.write(result) 
     outputFile.close()
-
+    
 def convertToInt(arr):
     aux = []
-
     for i in arr:
         aux.append(int(i))
-
     return aux
-
-def mainTest():
-    selection = input("c for compression, d for decompresion: ")
-    if selection == 'c':
-        path = input("Add path: ")
-        inputFile = io.open(path,"rb")
-        fileName = os.path.basename(path)
-
-        if ".PNG" in fileName or ".JPG" in fileName:
-            img = base64.b64encode(inputFile.read())
-            result = compression(img)
-
-        else:
-            result = compression(inputFile.read())
-
-        writeResult(fileName,result)
-
-    if selection == 'd':
-        path = input("Add path: ")
-        inputFile = io.open(path,"r")
-        result = decompression(inputFile.read())
     
 def iterate_and_compress(arguments):
     for arg in arguments:
         if os.path.isfile(arg): #if argument is a file opens and compressess it
-            with open(arg,'r') as f:
-                write_result(arg, compression(f.read())) 
-                #agregar condicional si es imagen
-                
-                
-        else: #if it's a directory scans and iterates it's paths
-            for entry in os.scandir(arg):
-                if entry.path.endswith(".txt"):
-                    with open(entry.path,'rb') as f: 
-                        write_result(entry.path, compression(f.read().decode()))
-                        
-                        
-                if entry.path.endswith(".png") or entry.path.endswith(".jpg"):
-                    with open(entry.path,'rb') as f:
-                        img = base64.b64encode(f.read())
-                        
-                        write_result(entry.path, compression(img.decode('utf-8')))                      
+            f = open(arg,"rb")
+            name = os.path.basename(arg)
+            if ".png" in name.lower() or ".jpg" in name.lower():
+                img = base64.b64encode(f.read())
+                write_result(name, compression(img))
+            else:
+                write_result(name, compression(f.read()))
+
     save_comp_file()
                                 
 def decompress_and_iterate(file_path):
     
-    with open(file_path, 'rb') as lzw_file:
-        compressed_files = pickle.load(lzw_file)
-        
-        for file in compressed_files:
-            file_name = file.pop(0)
-            result = decompress(file)
-            
-            if file_name.endswith('.txt'):
-                new_file = open(file_name,'w')             
-            elif file_name.endswith('.png') or file_name.endswith('.jpg'):
-                new_file = open(file_name,'wb')
-                result = base64.b64decode(result)
+    with open(file_path, 'r') as lzw_file:
+        compressed_files = lzw_file.readlines()
+        for inputFile in compressed_files:
+            decompress(inputFile)
 
-            new_file.write(result)
-            new_file.close()
 
 def main():
         
@@ -155,7 +119,7 @@ def main():
     
     except IndexError:
         print('no arguments found')    
-
+    
 if __name__ == "__main__":
     main()
     
