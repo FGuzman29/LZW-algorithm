@@ -1,3 +1,4 @@
+#! /usr/bin/python3
 import sys, re, os, io, base64, pickle
 
 compression_results = [] #lista de listas, donde indice [0][0] es el nombre del primer archivo comprimido y el resto es la lista de enteros resulatado de la compresion 
@@ -33,9 +34,9 @@ def write_result(name,result):
     compression_results += (result,)
 
 
-def save_comp_file(path):
+def save_comp_file():
     global compression_results
-    outfile = open(path+".lzw",'w')
+    outfile = open("result.lzw",'w')
     for i in compression_results:
         for j in i:
             outfile.write(str(j) + " ")
@@ -81,7 +82,6 @@ def convertToInt(arr):
     return aux
     
 def iterate_and_compress(arguments):
-    final = arguments.pop()
     for arg in arguments:
         if os.path.isfile(arg): #if argument is a file opens and compressess it
             f = open(arg,"rb")
@@ -92,7 +92,7 @@ def iterate_and_compress(arguments):
             else:
                 write_result(name, compression(f.read()))
 
-    save_comp_file(final)
+    save_comp_file()
                                 
 def decompress_and_iterate(file_path):
     
@@ -116,7 +116,7 @@ def main():
         elif arguments[0] == ("-h"): 
                 print('Flags: \n compress mode: -c  \n decompress mode: -d\n help: -h')
                 print("Usage: \n Windows: lzw.py [-mode/flag] [filesToCompress list] [compressedFile]")
-                print(" Linux:python3 lzw.py [-mode/flag] [filesToCompress list] [compressedFile]")
+                print(" Linux: ./lzw.py [-mode/flag] [filesToCompress list] [compressedFile]")
                 print("Warning: \n Last")
     
     except IndexError:
@@ -124,4 +124,3 @@ def main():
     
 if __name__ == "__main__":
     main()
-    
