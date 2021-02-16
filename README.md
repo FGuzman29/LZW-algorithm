@@ -1,8 +1,11 @@
 # LZW-algorithm
 
-*los archivos a comprimir deben estar en el mismo directorio que el script*
-programa probado con python 3.8+
-corra lzw.py -h para informacion, -c compresion y -d descompresion
+*El script soporta directorios,archivos de texto, imagenes PNG y JPG*
+El programa fue probado con python 3.8
+*Flags soportados:*
+- -h para informacion
+- -c para compresion
+- -d para descompresion
 
 
 
