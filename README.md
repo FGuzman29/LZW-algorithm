@@ -1,8 +1,18 @@
 # LZW-algorithm
 
-*El script soporta directorios,archivos de texto, imagenes PNG y JPG*
-El programa fue probado con python 3.8
-*Flags soportados:*
+*El script soporta directorios,archivos de texto, imagenes PNG y JPG*  
+El programa fue probado con python 3.8    
+  
+**Ejecucion del script:**  
+***Para comprimir:***  
+- Windows: lzw.py [-c] [files/directories ToCompress list]  
+- Linux: python3 lzw.py [-c] [files/directories ToCompress list]  
+
+***Para descomprimir:*** 
+- Windows: lzw.py [-d] [filesToDecompress]
+- Linux: python3 lzw.py [-d] [filesToDecompress]  
+
+**Flags soportados:**
 - -h para informacion
 - -c para compresion
 - -d para descompresion
