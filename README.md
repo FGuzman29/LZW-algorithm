@@ -1,6 +1,6 @@
 # LZW-algorithm
 
-*El script soporta directorios,archivos de texto, imagenes PNG y JPG*  
+El script soporta directorios, archivos de texto, imagenes PNG y JPG  
 El programa fue probado con python 3.8    
   
 **Ejecucion del script:**  
